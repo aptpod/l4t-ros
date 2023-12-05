@@ -1,0 +1,45 @@
+# Copyright 2015-2023 Open Source Robotics Foundation
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG RELEASE="r32.7"
+
+FROM reg.aptpod.io/intdash-robotics/l4t-ros/l4t-ros:foxy-ros-core-$RELEASE
+
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential \
+    git \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-rosdep \
+    python3-vcstool \
+    && rm -rf /var/lib/apt/lists/*
+
+# bootstrap rosdep
+RUN rosdep init && \
+  rosdep update --rosdistro $ROS_DISTRO
+
+# setup colcon mixin and metadata
+RUN colcon mixin add default \
+      https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
+    colcon mixin update && \
+    colcon metadata add default \
+      https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml && \
+    colcon metadata update
+
+# install ros2 packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-foxy-ros-base=0.9.2-1* \
+    && rm -rf /var/lib/apt/lists/*
+

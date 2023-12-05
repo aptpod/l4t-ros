@@ -1,0 +1,115 @@
+# Copyright (c) 2022, NVIDIA CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+ARG UBUNTU_DISTRIB="jammy"
+FROM docker.io/arm64v8/ubuntu:$UBUNTU_DISTRIB
+
+ARG RELEASE="r32.7"
+ARG SOC="t186"
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -qq -y --no-install-recommends \
+    bc \
+    bzip2 \
+    can-utils \
+    ca-certificates \
+    freeglut3-dev \
+    gnupg2 \
+    gstreamer1.0-alsa \
+    gstreamer1.0-libav \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-tools \
+    i2c-tools \
+    iw \
+    kbd \
+    kmod \
+    language-pack-en-base \
+    libapt-pkg-dev \
+    libcanberra-gtk3-module \
+    libgles2 \
+    libglu1-mesa-dev \
+    libglvnd-dev \
+    libgtk-3-0 \
+    libpython2.7 \
+    libudev1 \
+    libvulkan1 \
+    libzmq5 \
+    mtd-utils \
+    parted \
+    pciutils \
+    python3 \
+    python3-pexpect \
+    python3-distutils \
+    python3-numpy \
+    sox \
+    udev \
+    vulkan-tools \
+    wget \
+    wireless-tools wpasupplicant && \
+    rm -rf /var/lib/apt/lists/* && apt-get clean
+
+ADD --chown=root:root https://repo.download.nvidia.com/jetson/jetson-ota-public.asc /etc/apt/trusted.gpg.d/jetson-ota-public.asc
+RUN chmod 644 /etc/apt/trusted.gpg.d/jetson-ota-public.asc && \
+    echo "deb https://repo.download.nvidia.com/jetson/common $RELEASE main" >> /etc/apt/sources.list && \
+    echo "deb https://repo.download.nvidia.com/jetson/$SOC $RELEASE main" >> /etc/apt/sources.list
+
+RUN echo "/usr/lib/aarch64-linux-gnu/tegra" >> /etc/ld.so.conf.d/nvidia-tegra.conf && \
+    echo "/usr/lib/aarch64-linux-gnu/tegra-egl" >> /etc/ld.so.conf.d/nvidia-tegra.conf
+
+RUN rm /usr/share/glvnd/egl_vendor.d/50_mesa.json
+RUN mkdir -p /usr/share/glvnd/egl_vendor.d/ && echo '\
+{\
+    "file_format_version" : "1.0.0",\
+    "ICD" : {\
+        "library_path" : "libEGL_nvidia.so.0"\
+    }\
+}' > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+RUN mkdir -p /usr/share/egl/egl_external_platform.d/ && echo '\
+{\
+    "file_format_version" : "1.0.0",\
+    "ICD" : {\
+        "library_path" : "libnvidia-egl-wayland.so.1"\
+    }\
+}' > /usr/share/egl/egl_external_platform.d/nvidia_wayland.json
+
+RUN echo "/usr/local/cuda-10.0/targets/aarch64-linux/lib" >> /etc/ld.so.conf.d/nvidia.conf
+
+ARG CUDA=invalid
+
+COPY ./dst/bin /usr/local/cuda-$CUDA/bin
+COPY ./dst/nvvm /usr/local/cuda-$CUDA/nvvm
+COPY ./dst/nvvmx /usr/local/cuda-$CUDA/nvvmx
+COPY ./dst/include /usr/local/cuda-$CUDA/targets/aarch64-linux/include
+COPY ./dst/lib64/stubs /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/stubs
+COPY ./dst/lib64/libcudadevrt.a /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/
+COPY ./dst/lib64/libcudart_static.a /usr/local/cuda-$CUDA/targets/aarch64-linux/lib/
+
+RUN ln -s /usr/local/cuda-$CUDA /usr/local/cuda && \
+    ln -s /usr/local/cuda-$CUDA/targets/aarch64-linux/include /usr/local/cuda/include && \
+    ln -s /usr/local/cuda-$CUDA/targets/aarch64-linux/lib /usr/local/cuda/lib64
+
+ENV PATH /usr/local/cuda-$CUDA/bin:/usr/local/cuda/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/cuda-$CUDA/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}
+
+RUN ldconfig
+
+ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_DRIVER_CAPABILITIES all
+
+CMD ["/bin/bash"]
