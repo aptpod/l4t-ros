@@ -22,7 +22,7 @@ sudo make UBUNTU_DISTRIB=jammy image
 
 | 変数 | 値 |
 | ---- | ----- |
-| UBUNTU_DISTRIB | humble, foxy, noetic, melodic (default: humble) |
+| UBUNTU_DISTRIB | jammy, focal, bionic (default: jammy) |
 
 ## L4T ROSコンテナイメージ作成
 
