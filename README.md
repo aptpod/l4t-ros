@@ -42,14 +42,14 @@ make image
 | ROS2 Humble | ros/humble |
 | ROS2 Foxy | ros/foxy |
 | ROS Noetic | ros/noetic |
-| ROS2 Melodic | ros/melodic |
+| ROS Melodic | ros/melodic |
 
 
 ## Usage
 
 コンテナを実行するためのコマンド例は以下の通りです。GPUとGUIオプションを含めることができます。
 
-```
+```bash
 xhost +local:
 docker run -it --rm \
     --net=host \
