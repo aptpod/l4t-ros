@@ -17,7 +17,8 @@ L4T ROSコンテナイメージは、NVIDIA GPUに対応したROS（Robot Operat
 以下のコマンドを実行してイメージを作成します。
 
 ```bash
-sudo make UBUNTU_DISTRIB=jammy image
+sudo make UBUNTU_DISTRIB=jammy L4T_BASE_REGISTRY=l4t-base L4T_CUDA_REGISTRY=l4t-cuda image
+make UBUNTU_DISTRIB=jammy L4T_BASE_REGISTRY=l4t-base push
 ```
 
 | 変数 | 値 |

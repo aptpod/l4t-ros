@@ -14,7 +14,7 @@
 
 ARG RELEASE="r32.7"
 
-FROM reg.aptpod.io/intdash-robotics/l4t-ros/l4t-ros:foxy-ros-base-$RELEASE
+FROM l4t-ros:foxy-ros-base-$RELEASE
 
 # install ros2 packages
 RUN apt-get update && apt-get install -y --no-install-recommends \

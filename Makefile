@@ -39,4 +39,5 @@ image:
 	podman rmi  `podman images | grep $(L4T_CUDA_REGISTRY)  | head -n1 | awk '{print $$3;}'`
 
 push:
-	podman push $(L4T_BASE_REGISTRY):$(TAG)
+	sudo podman save $(L4T_BASE_REGISTRY):$(TAG) | docker load
+	docker tag localhost/$(L4T_BASE_REGISTRY):$(TAG) $(L4T_BASE_REGISTRY):$(TAG)
