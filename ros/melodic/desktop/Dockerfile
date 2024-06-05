@@ -14,7 +14,7 @@
 
 ARG RELEASE="r32.7"
 
-FROM reg.aptpod.io/intdash-robotics/l4t-ros/l4t-ros:melodic-robot-$RELEASE
+FROM l4t-ros:melodic-robot-$RELEASE
 
 # install ros packages
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -14,7 +14,7 @@
 
 ARG RELEASE="r32.7"
 
-FROM reg.aptpod.io/intdash-robotics/l4t-ros/l4t-base:bionic-$RELEASE
+FROM l4t-base:bionic-$RELEASE
 
 # setup timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \

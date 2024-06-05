@@ -14,7 +14,7 @@
 
 ARG RELEASE="r32.7"
 
-FROM reg.aptpod.io/intdash-robotics/l4t-ros/l4t-ros:noetic-ros-base-$RELEASE
+FROM l4t-ros:noetic-ros-base-$RELEASE
 
 # install ros packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
